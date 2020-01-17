@@ -116,11 +116,6 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.1</version>
-				</plugin>
-				<plugin>
 					<!-- 
 					  - This plugin generates the XML descriptor for the top-level PEAR analysis component. It runs during the 
 					  - "process-classes" phase such that the descriptor is available when the PEAR is actually packaged later
@@ -155,6 +150,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.1.1</version>
 					<executions>
 						<execution>
 							<id>copy-dependencies</id>
