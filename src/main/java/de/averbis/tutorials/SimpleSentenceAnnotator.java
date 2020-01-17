@@ -24,6 +24,9 @@ import org.apache.uima.jcas.JCas;
 
 import de.averbis.extraction.types.Sentence;
 
+/**
+ * Simple sentence splitter which uses a basic regular expression to separate the text into sentences.
+ */
 public class SimpleSentenceAnnotator extends JCasAnnotator_ImplBase {
 
 	private static Pattern pattern = Pattern.compile("([.?!]+)(\\s+)([^\\p{Ll}])");

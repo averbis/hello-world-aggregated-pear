@@ -24,6 +24,9 @@ import org.apache.uima.jcas.JCas;
 
 import de.averbis.extraction.types.Token;
 
+/**
+ * Simple tokenizer which uses a basic regular expression to separate the text into tokens.
+ */
 public class SimpleTokenAnnotator extends JCasAnnotator_ImplBase {
 
 	private static Pattern pattern = Pattern.compile("[|.+*;,!?/\n\r	 :@_()\"`„”““—’‘'¿-]");
