@@ -16,29 +16,34 @@
 package de.averbis.tutorials;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 
 import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 
+/**
+ * Generates an aggregate descriptor (a pipeline) containing the {@ink SimpleTokenAnnotator} and the {@link SimpleSentenceAnnotator} and writes this to disk. This becomes the
+ * top-level analysis component for the PEAR. It is called during the build using the {@code exec-maven-plugin}. See the {@code pom.xml} file in the root folder of the project.
+ */
 public class GenerateAggregateAnalysisDescriptor {
 
-	public void generateDescriptor(String fileName) throws Exception {
+	public void generateDescriptor(File file) throws Exception {
 
 		AggregateBuilder builder = new AggregateBuilder();
 
 		builder.add(AnalysisEngineFactory.createEngineDescription(SimpleTokenAnnotator.class));
 		builder.add(AnalysisEngineFactory.createEngineDescription(SimpleSentenceAnnotator.class));
 
-		File file = new File(fileName);
 		file.getParentFile().mkdirs();
-		builder.createAggregateDescription().toXML(new FileWriter(new File(fileName)));
+		try (FileOutputStream os = new FileOutputStream(file)) {
+			builder.createAggregateDescription().toXML(os);
+		}
 	}
 
 
 	public static void main(String[] args) throws Exception {
 
-		new GenerateAggregateAnalysisDescriptor().generateDescriptor(args[0] + "aaeDescriptor.xml");
+		new GenerateAggregateAnalysisDescriptor().generateDescriptor(new File(args[0], "aaeDescriptor.xml"));
 	}
 
 }

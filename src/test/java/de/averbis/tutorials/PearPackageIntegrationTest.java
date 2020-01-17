@@ -38,8 +38,10 @@ import de.averbis.extraction.types.Sentence;
 import de.averbis.extraction.types.Token;
 
 /**
- *
- * @author entwicklerteam
+ * Tests that the PEAR was built, can be installed and produces the expected output.
+ * <p>
+ * This is not a regular unit test, but an integration test. First the PEAR file is built during the {@code package} phase of the Maven built. Integration tests run after that
+ * during the {@code integration-test} phase.
  */
 public class PearPackageIntegrationTest {
 

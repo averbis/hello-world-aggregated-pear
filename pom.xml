@@ -1,15 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--  
+  Copyright 2020 Averbis GmbH
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<packaging>jar</packaging>
 	<groupId>de.averbis.tutorials</groupId>
 	<artifactId>hello-world-aggregated-pear</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
+	
 	<name>${project.artifactId}</name>
-
-	<packaging>jar</packaging>
+	<description>
+		This project provides a minimal example how to build an aggregated analysis engine and 
+		how to bundle it as a self contained UIMA PEAR package.
+	</description>
+	<url>https://github.com/averbis/hello-world-aggregated-pear</url>
+	<inceptionYear>2020</inceptionYear>
+	<organization>
+		<name>Averbis GmbH</name>
+		<url>https://averbis.com</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache License Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
 	<properties>
 		<uima-version>2.10.4</uima-version>
@@ -28,6 +60,10 @@
 		</dependency>
 
 		<dependency>
+			<!-- 
+			  - Dependencies on the core UIMA framework must be marked as "provided" to avoid packaging them in 
+			  - the PEAR archive 
+			  -->
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimaj-core</artifactId>
 			<version>${uima-version}</version>
@@ -35,6 +71,10 @@
 		</dependency>
 
 		<dependency>
+			<!-- 
+			  - Dependencies on the core UIMA framework must be marked as "provided" to avoid packaging them in 
+			  - the PEAR archive 
+			  -->
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimafit-core</artifactId>
 			<version>${uimafit-version}</version>
@@ -76,6 +116,16 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<!-- 
+					  - This plugin generates the XML descriptor for the top-level PEAR analysis component. It runs during the 
+					  - "process-classes" phase such that the descriptor is available when the PEAR is actually packaged later
+					  - in the "package" phase.
+					 -->
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.6.0</version>
@@ -96,6 +146,12 @@
 						</execution>
 					</executions>
 				</plugin>
+					<!-- 
+					  - This plugin picks up all the dependencies of the PEAR and stages them to a temporary folder. This folder 
+					  - later ends up in the PEAR archive. Note that only dependencies with the scope "runtime" (this also 
+					  - implicitly includes "compile" dependencies) are included. I.e. "provided" dependencies are NOT included.
+					  - These include e.g. the UIMA libraries themselves (see above).
+					 -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
@@ -114,6 +170,10 @@
 						</execution>
 					</executions>
 				</plugin>
+				<!-- 
+				  - This plugin creates a PEAR package using the generated descriptor, the staged dependencies and the classes
+				  - and resources directly included in this Maven project. The PEAR file is generated in the "target" folder.
+				 -->
 				<plugin>
 					<groupId>org.apache.uima</groupId>
 					<artifactId>PearPackagingMavenPlugin</artifactId>
@@ -133,6 +193,11 @@
 						</execution>
 					</executions>
 				</plugin>
+				<!--
+				  - This plugin tests if the PEAR file has been properly generated and works as expected. The test 
+				  - is not a regular unit test, but an integration test. First the PEAR file is built during the "package" 
+				  - phase of the Maven built. Integration tests run after that during the "integration-test" phase.
+				-->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
@@ -160,8 +225,10 @@
 					</executions>
 				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
+				<!--
+				  - This plugin's configuration is used to store Eclipse m2e settings  only. It has no influence on the Maven 
+				  - build itself. 
+				  -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -171,15 +238,9 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											exec-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.6.0,)
-										</versionRange>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>exec-maven-plugin</artifactId>
+										<versionRange>[1.6.0,)	</versionRange>
 										<goals>
 											<goal>java</goal>
 										</goals>
