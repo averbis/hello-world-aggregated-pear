@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Averbis GmbH
+ * Copyright 2021 Averbis GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,23 @@ import de.averbis.extraction.types.Token;
 /**
  * Tests that the PEAR was built, can be installed and produces the expected output.
  * <p>
- * This is not a regular unit test, but an integration test. First the PEAR file is built during the {@code package} phase of the Maven built. Integration tests run after that
- * during the {@code integration-test} phase.
+ * This is not a regular unit test, but an integration test. First the PEAR file is built during the
+ * {@code package} phase of the Maven built. Integration tests run after that during the
+ * {@code integration-test} phase.
  */
-public class PearPackageIntegrationTest {
+public class PearPackageIT {
 
 	@Test
 	public void testProcessText() throws IOException, UIMAException {
 
-		PackageBrowser packageBrowser = this.installPackage();
-		XMLInputSource xmlInputSource = new XMLInputSource(packageBrowser.getComponentPearDescPath());
-		PearSpecifier pearSpecifier = UIMAFramework.getXMLParser().parsePearSpecifier(xmlInputSource);
+		PackageBrowser packageBrowser = installPackage();
+		XMLInputSource xmlInputSource = new XMLInputSource(
+				packageBrowser.getComponentPearDescPath());
+		PearSpecifier pearSpecifier = UIMAFramework.getXMLParser()
+				.parsePearSpecifier(xmlInputSource);
 
-		AnalysisEngine analysisEngine = UIMAFramework.produceAnalysisEngine(pearSpecifier, new SimpleNamedResourceManager(), null);
+		AnalysisEngine analysisEngine = UIMAFramework.produceAnalysisEngine(pearSpecifier,
+				new SimpleNamedResourceManager(), null);
 
 		JCas jCas = JCasFactory.createJCas();
 		jCas.setDocumentText("Test document. This is a test.");
@@ -67,7 +71,8 @@ public class PearPackageIntegrationTest {
 
 	private PackageBrowser installPackage() {
 
-		Collection<File> files = FileUtils.listFiles(new File("target/"), new String[] { "pear" }, false);
+		Collection<File> files = FileUtils.listFiles(new File("target/"), new String[] { "pear" },
+				false);
 
 		Assert.assertEquals(1, files.size());
 

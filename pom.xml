@@ -22,7 +22,7 @@
 	<packaging>jar</packaging>
 	<groupId>de.averbis.tutorials</groupId>
 	<artifactId>hello-world-aggregated-pear</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 
 	<name>${project.artifactId}</name>
 	<description>
@@ -50,7 +50,7 @@
 		<health-typesystems-version>3.1.0</health-typesystems-version>
 
 		<uima-version>3.2.0</uima-version>
-		<uimafit-version>3.2.0</uimafit-version>
+		<ruta-version>3.1.0</ruta-version>
 		<log4j-version>2.8.2</log4j-version>
 		<slf4j-version>1.7.30</slf4j-version>
 
@@ -60,18 +60,12 @@
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j-version}</version>
 			<scope>provided</scope>
 		</dependency>
-
-			<!-- 
-			  - Dependencies on the core UIMA framework must be marked as "provided" to avoid packaging them in 
-			  - the PEAR archive 
-			  -->
 		<dependency>
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimaj-core</artifactId>
@@ -81,10 +75,14 @@
 
 		<dependency>
 			<groupId>org.apache.uima</groupId>
-			<artifactId>uimafit-core</artifactId>
-			<version>${uimafit-version}</version>
+			<artifactId>ruta-core</artifactId>
+			<version>${ruta-version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.uima</groupId>
+			<artifactId>ruta-core-ext</artifactId>
+			<version>${ruta-version}</version>
+		</dependency>
 		<dependency>
 			<groupId>de.averbis.textanalysis</groupId>
 			<artifactId>components-core-typesystem</artifactId>
@@ -103,6 +101,26 @@
 		<dependency>
 			<groupId>de.averbis.textanalysis</groupId>
 			<artifactId>numeric-value-typesystem</artifactId>
+			<version>${core-typesystems-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.averbis.textanalysis</groupId>
+			<artifactId>named-entity-typesystem</artifactId>
+			<version>${core-typesystems-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.averbis.textanalysis</groupId>
+			<artifactId>text-typesystem</artifactId>
+			<version>${core-typesystems-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.averbis.textanalysis</groupId>
+			<artifactId>neural-typesystem</artifactId>
+			<version>${core-typesystems-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.averbis.textanalysis</groupId>
+			<artifactId>evaluation-typesystem</artifactId>
 			<version>${core-typesystems-version}</version>
 		</dependency>
 
@@ -185,7 +203,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -200,8 +218,8 @@
 			<version>${log4j-version}</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
+
 	<build>
 		<resources>
 			<resource>
@@ -213,131 +231,198 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.21.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.uima</groupId>
-				<artifactId>PearPackagingMavenPlugin</artifactId>
+				<artifactId>ruta-maven-plugin</artifactId>
+				<version>${ruta-version}</version>
+				<executions>
+					<execution>
+						<id>descriptors</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<scriptFiles>
+								<directory>${basedir}/src/main/ruta</directory>
+								<includes>
+									<include>**/*.ruta</include>
+								</includes>
+							</scriptFiles>
+							<analysisEngineTemplate>${basedir}/src/main/resources/descriptor/GeneratedBasicEngine.xml</analysisEngineTemplate>
+							<typeSystemOutputDirectory>${project.build.directory}/generated-sources/ruta/descriptor</typeSystemOutputDirectory>
+							<analysisEngineOutputDirectory>${project.build.directory}/generated-sources/ruta/descriptor</analysisEngineOutputDirectory>
+							<analysisEngineSuffix>RutaAnnotator</analysisEngineSuffix>
+							<typeSystemSuffix>RutaTypeSystem</typeSystemSuffix>
+							<encoding>UTF-8</encoding>
+							<importByName>true</importByName>
+							<resolveImports>false</resolveImports>
+							<maxBuildRetries>-1</maxBuildRetries>
+							<extensionPackages>
+								<extensionPackage>org.apache.uima.ruta</extensionPackage>
+							</extensionPackages>
+							<addRutaNature>true</addRutaNature>
+							<buildPaths>
+							</buildPaths>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Generate Java classes for defined types -->
+			<plugin>
+				<groupId>org.apache.uima</groupId>
+				<artifactId>jcasgen-maven-plugin</artifactId>
+				<version>${uima-version}</version>
+				<executions>
+					<execution>
+						<id>generate-jcas-classes</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<typeSystemIncludes>
+								<typeSystemInclude>target/generated-sources/ruta/descriptor/com/example/nlp/ContractRutaTypeSystem.xml</typeSystemInclude>
+							</typeSystemIncludes>
+							<typeSystemExcludes>
+								<typeSystemExclude>/**/BasicTypeSystem.xml</typeSystemExclude>
+								<typeSystemExclude>/**/InternalTypeSystem.xml</typeSystemExclude>
+							</typeSystemExcludes>
+							<limitToProject>true</limitToProject>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<!-- Copies the type system to the pearPackaging folder -->
+					<execution>
+						<id>copy-type-system</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputDirectory>${basedir}/target/classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/target/generated-sources/ruta/descriptor</directory>
+									<includes>
+										<include>**/*.xml</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<!-- Copies the configured descriptors to the pearPackaging folder -->
+					<execution>
+						<id>copy-descriptors</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputDirectory>${basedir}/target/pearPackaging/desc</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/target/generated-sources/ruta/descriptor/</directory>
+									<includes>
+										<include>**/*.xml</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
-		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<plugin>
+			<!-- Include dependencies in runtime scope as libraries -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/pearPackaging/lib</outputDirectory>
+							<overWriteSnapshots>true</overWriteSnapshots>
+							<includeScope>runtime</includeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 					<!-- 
 					  - This plugin generates the XML descriptor for the top-level PEAR analysis component. It runs during the 
 					  - "process-classes" phase such that the descriptor is available when the PEAR is actually packaged later
 					  - in the "package" phase.
 					 -->
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.6.0</version>
-					<executions>
-						<execution>
-							<id>generate-aae</id>
-							<phase>process-classes</phase>
-							<goals>
-								<goal>java</goal>
-							</goals>
-							<configuration>
-								<mainClass>de.averbis.tutorials.GenerateAggregateAnalysisDescriptor</mainClass>
-								<classpathScope>compile</classpathScope>
-								<arguments>
-									<argument>${project.build.directory}/pearPackaging/desc/de/averbis/tutorials/</argument>
-								</arguments>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-					<!-- 
-					  - This plugin picks up all the dependencies of the PEAR and stages them to a temporary folder. This folder 
-					  - later ends up in the PEAR archive. Note that only dependencies with the scope "runtime" (this also 
-					  - implicitly includes "compile" dependencies) are included. I.e. "provided" dependencies are NOT included.
-					  - These include e.g. the UIMA libraries themselves (see above).
-					 -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.1</version>
-					<executions>
-						<execution>
-							<id>copy-dependencies</id>
-							<phase>package</phase>
-							<goals>
-								<goal>copy-dependencies</goal>
-							</goals>
-							<configuration>
-								<outputDirectory>${basedir}/target/pearPackaging/lib</outputDirectory>
-								<overWriteSnapshots>true</overWriteSnapshots>
-								<includeScope>runtime</includeScope>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<!-- 
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<id>generate-aae</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>de.averbis.tutorials.GenerateAggregateAnalysisDescriptor</mainClass>
+							<classpathScope>compile</classpathScope>
+							<arguments>
+								<argument>${project.build.directory}/pearPackaging/desc/de/averbis/tutorials/</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- 
 				  - This plugin creates a PEAR package using the generated descriptor, the staged dependencies and the classes
 				  - and resources directly included in this Maven project. The PEAR file is generated in the "target" folder.
 				 -->
-				<plugin>
-					<groupId>org.apache.uima</groupId>
-					<artifactId>PearPackagingMavenPlugin</artifactId>
-					<version>${uima-version}</version>
-					<extensions>true</extensions>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<configuration>
-								<mainComponentDesc>desc/de/averbis/tutorials/aaeDescriptor.xml</mainComponentDesc>
-								<componentId>${project.artifactId}-${project.version}</componentId>
-								<datapath>$main_root/resources</datapath>
-							</configuration>
-							<goals>
-								<goal>package</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<!--
-				  - This plugin tests if the PEAR file has been properly generated and works as expected. The test 
-				  - is not a regular unit test, but an integration test. First the PEAR file is built during the "package" 
-				  - phase of the Maven built. Integration tests run after that during the "integration-test" phase.
-				-->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<configuration>
-						<excludes>
-							<exclude>**/*IntegrationTest.java</exclude>
-						</excludes>
-					</configuration>
-					<executions>
-						<execution>
-							<id>integration-test</id>
-							<goals>
-								<goal>test</goal>
-							</goals>
-							<phase>integration-test</phase>
-							<configuration>
-								<excludes>
-									<exclude>none</exclude>
-								</excludes>
-								<includes>
-									<include>**/*IntegrationTest.java</include>
-								</includes>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-
-				<!--
-				  - This plugin's configuration is used to store Eclipse m2e settings  only. It has no influence on the Maven 
-				  - build itself. 
-				  -->
+			<plugin>
+				<groupId>org.apache.uima</groupId>
+				<artifactId>PearPackagingMavenPlugin</artifactId>
+				<version>${uima-version}</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<mainComponentDesc>desc/de/averbis/tutorials/aaeDescriptor.xml</mainComponentDesc>
+							<componentId>${project.artifactId}-${project.version}</componentId>
+							<datapath>$main_root/resources</datapath>
+						</configuration>
+						<goals>
+							<goal>package</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -349,7 +434,7 @@
 									<pluginExecutionFilter>
 										<groupId>org.codehaus.mojo</groupId>
 										<artifactId>exec-maven-plugin</artifactId>
-										<versionRange>[1.6.0,)	</versionRange>
+										<versionRange>[1.6.0,)</versionRange>
 										<goals>
 											<goal>java</goal>
 										</goals>
