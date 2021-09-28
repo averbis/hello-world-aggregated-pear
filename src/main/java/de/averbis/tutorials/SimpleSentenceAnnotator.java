@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Averbis GmbH
+ * Copyright 2021 Averbis GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.apache.uima.jcas.JCas;
 import de.averbis.extraction.types.Sentence;
 
 /**
- * Simple sentence splitter which uses a basic regular expression to separate the text into sentences.
+ * Simple sentence splitter which uses a basic regular expression to separate the text into
+ * sentences.
  */
 public class SimpleSentenceAnnotator extends JCasAnnotator_ImplBase {
 
@@ -41,11 +42,11 @@ public class SimpleSentenceAnnotator extends JCasAnnotator_ImplBase {
 		while (matcher.find(start)) {
 			int eosSymbEnd = matcher.end(1);
 
-			this.createSentence(jcas, start, eosSymbEnd);
+			createSentence(jcas, start, eosSymbEnd);
 			start = matcher.start(3);
 		}
 		if (start < text.length()) {
-			this.createSentence(jcas, start, text.length());
+			createSentence(jcas, start, text.length());
 		}
 
 	}

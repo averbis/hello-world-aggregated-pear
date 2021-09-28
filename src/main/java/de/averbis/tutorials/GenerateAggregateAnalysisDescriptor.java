@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Averbis GmbH
+ * Copyright 2021 Averbis GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 
 /**
- * Generates an aggregate descriptor (a pipeline) containing the {@ink SimpleTokenAnnotator} and the {@link SimpleSentenceAnnotator} and writes this to disk. This becomes the
- * top-level analysis component for the PEAR. It is called during the build using the {@code exec-maven-plugin}. See the {@code pom.xml} file in the root folder of the project.
+ * Generates an aggregate descriptor (a pipeline) containing the {@ink SimpleTokenAnnotator} and the
+ * {@link SimpleSentenceAnnotator} and writes this to disk. This becomes the top-level analysis
+ * component for the PEAR. It is called during the build using the {@code exec-maven-plugin}. See
+ * the {@code pom.xml} file in the root folder of the project.
  */
 public class GenerateAggregateAnalysisDescriptor {
 
@@ -43,7 +45,8 @@ public class GenerateAggregateAnalysisDescriptor {
 
 	public static void main(String[] args) throws Exception {
 
-		new GenerateAggregateAnalysisDescriptor().generateDescriptor(new File(args[0], "aaeDescriptor.xml"));
+		new GenerateAggregateAnalysisDescriptor()
+				.generateDescriptor(new File(args[0], "aaeDescriptor.xml"));
 	}
 
 }
