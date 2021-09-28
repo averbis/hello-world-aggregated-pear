@@ -60,16 +60,20 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j-version}</version>
-			<scope>provided</scope>
-		</dependency>
+		<!-- 
+		  - Dependencies on the core UIMA framework must be marked as "provided" to avoid packaging them in 
+		  - the PEAR archive 
+		  -->
 		<dependency>
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimaj-core</artifactId>
 			<version>${uima-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -254,7 +258,12 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Include dependencies in runtime scope as libraries -->
+			<!-- 
+			  - This plugin picks up all the dependencies of the PEAR and stages them to a temporary folder. This folder 
+			  - later ends up in the PEAR archive. Note that only dependencies with the scope "runtime" (this also 
+			  - implicitly includes "compile" dependencies) are included. I.e. "provided" dependencies are NOT included.
+			  - These include e.g. the UIMA libraries themselves (see above).
+			 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
